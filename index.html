@@ -143,5 +143,60 @@
       finalSection.style.display = "flex";
     }
   </script>
+<script>
+  // Tạo hiệu ứng trái tim bay
+  function createHeart() {
+    const heart = document.createElement("div");
+    heart.className = "heart";
+    heart.style.left = Math.random() * 100 + "vw";
+    document.body.appendChild(heart);
+
+    setTimeout(() => {
+      heart.remove();
+    }, 3000);
+  }
+
+  setInterval(createHeart, 300); // Cứ 300ms tạo 1 trái tim
+
+  // CSS trái tim
+  const style = document.createElement('style');
+  style.innerHTML = `
+    .heart {
+      width: 20px;
+      height: 20px;
+      position: fixed;
+      bottom: 0;
+      background-color: #ff69b4;
+      transform: rotate(45deg);
+      animation: float 3s linear forwards;
+      z-index: 1000;
+    }
+    .heart::before,
+    .heart::after {
+      content: "";
+      width: 20px;
+      height: 20px;
+      position: absolute;
+      background-color: #ff69b4;
+      border-radius: 50%;
+    }
+    .heart::before {
+      top: -10px;
+      left: 0;
+    }
+    .heart::after {
+      left: -10px;
+      top: 0;
+    }
+    @keyframes float {
+      to {
+        transform: translateY(-100vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+</script>
+
 </body>
 </html>
