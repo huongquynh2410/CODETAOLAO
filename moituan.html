@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mỗi tuần một việc ý nghĩa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background: linear-gradient(to top right, #fff0f5, #e0f7fa);
+      text-align: center;
+      padding: 40px;
+      color: #e91e63;
+      overflow: hidden;
+      position: relative;
+    }
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      animation: popIn 1s ease forwards;
+    }
+    .msg-box {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      max-width: 500px;
+      margin: auto;
+      font-size: 1.5em;
+      animation: fadeIn 1.5s ease;
+    }
+    .day-count {
+      font-size: 1.2em;
+      margin-top: 20px;
+      color: #777;
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.7); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .task-box {
+      background: #fff9f9;
+      padding: 20px;
+      border-radius: 15px;
+      margin-top: 30px;
+      font-size: 1.2em;
+      color: #c2185b;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    }
+    .heart {
+      width: 20px;
+      height: 20px;
+      background-color: #ff69b4;
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%) rotate(45deg);
+      animation: float 5s linear infinite;
+      opacity: 0.7;
+    }
+    .heart::before,
+    .heart::after {
+      content: "";
+      width: 20px;
+      height: 20px;
+      background-color: #ff69b4;
+      border-radius: 50%;
+      position: absolute;
+    }
+    .heart::before {
+      top: -10px;
+      left: 0;
+    }
+    .heart::after {
+      top: 0;
+      left: -10px;
+    }
+    @keyframes float {
+      0% {
+        transform: translateX(0) translateY(0) rotate(45deg);
+        opacity: 0.7;
+      }
+      100% {
+        transform: translateX(-100px) translateY(-100vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Mỗi tuần một việc ý nghĩa 💝</h1>
+  <div class="msg-box" id="weeklyTask">Đang tải hoạt động trong tuần...</div>
+
+  <script>
+    const weeklyTasks = [
+      "Viết một bức thư tay thật lòng gửi cho nhau 💌",
+      "Chụp một tấm ảnh kỷ niệm đặc biệt 📸",
+      "Cùng nhau làm từ thiện hoặc chia sẻ điều tốt đẹp ✨",
+      "Làm một video ghi lại lời hứa hoặc ước mơ chung 🎥",
+      "Cùng nhau học một điều mới (một từ tiếng Anh, một công thức...) 📚",
+      "Lên kế hoạch cho một chuyến đi mơ ước (dù chưa thực hiện ngay) 🌍",
+      "Thử 'một ngày không điện thoại' để chỉ dành thời gian cho nhau ☀️",
+      "Cùng nhau trang trí góc học tập hoặc góc yêu thương 🏡",
+      "Làm album ảnh hoặc hộp kỷ niệm cùng nhau 📦",
+      "Cùng nhau chọn 1 bài hát chủ đề của tuần và nghe mỗi tối 🎶",
+      "Viết 10 điều biết ơn về nhau và đọc cho đối phương nghe 💕",
+      "Ghi lại nhật ký giọng nói – mỗi người nói 1 phút về tuần vừa qua 🎤",
+      "Cùng nhau trồng một cây nhỏ để nuôi dưỡng tình yêu 🌱",
+      "Cùng nhau xem một phim hoặc đọc một chương sách cảm động 📖",
+      "Thiết kế 'voucher yêu thương' để sử dụng bất kỳ lúc nào 🎁",
+      "Chơi trò 'trả lời thật lòng' 5 câu mỗi người mỗi đêm 🌙",
+      "Làm một playlist 5 bài nhạc thể hiện cảm xúc tuần này 🎧",
+      "Viết một lá thư cho 'anh/em của 1 năm sau' 📬",
+      "Tạo một sơ đồ 'giấc mơ chung' cùng nhau để treo lên 🗺️",
+      "Một tuần chỉ gọi nhau bằng biệt danh siêu ngọt 😚",
+      "Làm một thử thách 7 ngày ôm/viết lời ngọt/1 việc tốt 💗",
+      "Tạo 1 hộp 'niềm vui' – mỗi người bỏ vào điều khiến mình cười hôm đó 😊",
+      "Gửi bất ngờ nhỏ vào balo/túi của nhau không báo trước 🎈",
+      "Cùng nhau viết lại câu chuyện tình yêu theo kiểu cổ tích 📜",
+      "Tạo 'top 5 kỷ niệm đáng nhớ' và vẽ minh họa 🎨",
+      "Một đêm chỉ lắng nghe nhau kể về nỗi sợ / ước mơ sâu xa nhất 🌌"
+    ];
+
+    const today = new Date();
+    const start = new Date("2025-06-30");
+    const weekDiff = Math.floor((today - start) / (1000 * 60 * 60 * 24 * 7));
+
+    const taskBox = document.getElementById("weeklyTask");
+
+    if (today < start) {
+      taskBox.innerText = "Chưa tới ngày bắt đầu đâu nè, chờ xíu nhaaaa 💞";
+    } else {
+      taskBox.innerText = "Hoạt động tụi mình nên làm tuần này: " + weeklyTasks[weekDiff % weeklyTasks.length];
+    }
+
+    // Hiệu ứng trái tim bay
+    function createHeart() {
+      const heart = document.createElement("div");
+      heart.className = "heart";
+      heart.style.left = Math.random() * 100 + "%";
+      document.body.appendChild(heart);
+      setTimeout(() => heart.remove(), 5000);
+    }
+    setInterval(createHeart, 500);
+  </script>
+</body>
+</html>
