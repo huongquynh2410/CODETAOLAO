@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Anh có iu em hông?</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(to top right, #ffe6f0, #e0f7fa);
+      font-family: 'Quicksand', sans-serif;
+      text-align: center;
+      padding: 40px;
+      overflow: hidden;
+    }
+
+    h1 {
+      font-size: 2.8em;
+      color: #e91e63;
+      margin-top: 20px;
+    }
+
+    #firstGif {
+      width: 250px;
+      border-radius: 20px;
+      margin-top: 10px;
+    }
+
+    #buttons {
+      margin-top: 40px;
+      display: flex;
+      justify-content: center;
+      gap: 80px;
+    }
+
+    button {
+      font-size: 1.3em;
+      padding: 15px 35px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    #yesBtn {
+      background-color: #ff69b4;
+      color: white;
+    }
+
+    #noBtn {
+      background-color: #607d8b;
+      color: white;
+    }
+
+    #finalSection {
+      display: none;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    #finalMessage {
+      font-size: 3em;
+      margin-bottom: 30px;
+      color: #ff4081;
+      animation: popIn 1s ease;
+    }
+
+    #finalGif {
+      width: 450px;
+      border-radius: 25px;
+      animation: popIn 1s ease;
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <img id="firstGif" src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExbml0OG92bHJjNDljdDltZXoxZm05eTJpOW0ydWNmcDhyODc5eHRmdCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/VbnUQpnihPSIgIXuZv/giphy.gif" alt="Cute gif">
+  
+  <h1 id="question">Anh có iu em hông? 🥺</h1>
+
+  <div id="buttons">
+    <button id="yesBtn">Có 🥰</button>
+    <button id="noBtn">Không 😐</button>
+  </div>
+
+  <!-- Final message and gif section -->
+  <div id="finalSection">
+    <div id="finalMessage">Em biết anh iu em mà hehe 💖</div>
+    <img id="finalGif" src="https://media.giphy.com/media/MDJ9IbxxvDUQM/giphy.gif" alt="Love gif">
+  </div>
+
+  <script>
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn = document.getElementById("noBtn");
+    const question = document.getElementById("question");
+    const finalSection = document.getElementById("finalSection");
+    const firstGif = document.getElementById("firstGif");
+    const buttons = document.getElementById("buttons");
+
+    const noTexts = [
+      "Ê nha",
+      "Anh nói xạo hả 😒",
+      "Đừng giỡn mặt với em nha 😑",
+      "Suy nghĩ kỹ lại đi 😤",
+      "Anh dám hả 😠",
+      "Em giận á 😤"
+    ];
+
+    let noClickCount = 0;
+    let yesSize = 1.2;
+    let noSize = 1.2;
+
+    noBtn.addEventListener("click", () => {
+      if (noClickCount < noTexts.length) {
+        noBtn.innerText = noTexts[noClickCount];
+      } else {
+        noBtn.innerText = "Bấm CÓ lẹ đi 😡";
+      }
+      noClickCount++;
+      noSize *= 0.9;
+      yesSize *= 1.25;
+
+      noBtn.style.transform = `scale(${noSize})`;
+      yesBtn.style.transform = `scale(${yesSize})`;
+
+      if (yesSize > 5) {
+        showFinalMessage();
+      }
+    });
+
+    yesBtn.addEventListener("click", showFinalMessage);
+
+    function showFinalMessage() {
+      question.style.display = "none";
+      buttons.style.display = "none";
+      firstGif.style.display = "none";
+      finalSection.style.display = "flex";
+    }
+  </script>
+</body>
+</html>
