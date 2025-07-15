@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vòng Quay Chọn Phim 🎡</title>
+<style>
+  body {
+    font-family: 'Quicksand', sans-serif;
+    text-align: center;
+    background: linear-gradient(to top right, #ffe0ec, #e0f7fa);
+    padding: 30px;
+    overflow-x: hidden;
+  }
+  h1 {
+    color: #e91e63;
+    margin-bottom: 10px;
+  }
+  select, button {
+    padding: 10px 15px;
+    font-size: 1em;
+    margin-top: 10px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  select {
+    width: 200px;
+  }
+  button {
+    background-color: #ff69b4;
+    color: white;
+    margin-left: 10px;
+  }
+  button:hover {
+    background-color: #e91e63;
+  }
+  canvas {
+    margin-top: 20px;
+  }
+  .result {
+    margin-top: 30px;
+    font-size: 1.8em;
+    color: #ff4081;
+    opacity: 0;
+    transform: scale(0);
+    transition: transform 0.5s ease, opacity 0.5s ease;
+  }
+  .result.show {
+    opacity: 1;
+    transform: scale(1.2);
+    animation: popIn 0.6s ease forwards;
+  }
+  @keyframes popIn {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.3); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+</style>
+</head>
+<body>
+<h1>🎡 Hôm nay chúng ta xem phim gì đây ta? 🎥</h1>
+
+<label for="category">Chọn thể loại phim:</label>
+<select id="category">
+  <option value="romantic">Nhẹ nhàng tình cảm</option>
+  <option value="intense">Nặng đô / bỏng mắt 🔥</option>
+  <option value="deep">Sâu sắc / nên xem một mình</option>
+</select>
+<button onclick="startSpin()">Quay Vòng Quay 🎉</button>
+
+<canvas id="wheel" width="300" height="300"></canvas>
+
+<div class="result" id="result"></div>
+
+<script>
+const allMovies = {
+  romantic: [
+    "Purple Hearts","Cô Gái Thế Kỷ 20","Những Ngày Tươi Đẹp","Cuộc Gặp Định Mệnh",
+    "Set It Up","Before Sunrise","Love Actually","Midnight in Paris","Flipped"
+  ],
+  intense: [
+    "365 Days","Dark Desire","Body Heat","Sex/Life 2021","Elite",
+    "Sex Education","After","After We Fell","Mr & Mrs Smith","Twilight"
+  ],
+  deep: [
+    "Big Little Lies","Call Me by Your Name","The Lobster","Her",
+    "Eternal Sunshine","The Girl with the Pearl Earring","Coraline","The Handmaiden"
+  ]
+};
+
+let movies = [];  // Sẽ chứa danh sách phim theo phân loại
+let startAngle = 0;
+let spinAngle = 0;
+let spinning = false;
+const colors = ["#ffb6c1","#f08080","#add8e6","#90ee90","#dda0dd","#ffa07a","#87cefa","#98fb98"];
+const canvas = document.getElementById('wheel');
+const ctx = canvas.getContext('2d');
+const resultDiv = document.getElementById('result');
+
+function drawWheel() {
+  if (!movies.length) return;
+  const num = movies.length;
+  const arc = 2 * Math.PI / num;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  for (let i = 0; i < num; i++) {
+    const angle = startAngle + i * arc;
+    ctx.fillStyle = colors[i % colors.length];
+    ctx.beginPath();
+    ctx.moveTo(150, 150);
+    ctx.arc(150, 150, 150, angle, angle + arc, false);
+    ctx.lineTo(150, 150);
+    ctx.fill();
+
+    ctx.fillStyle = "white";
+    ctx.font = "12px Quicksand";
+    ctx.save();
+    ctx.translate(150, 150);
+    ctx.rotate(angle + arc / 2);
+    ctx.textAlign = "right";
+    ctx.fillText(movies[i], 140, 5);
+    ctx.restore();
+  }
+}
+
+function rotateWheel() {
+  startAngle += spinAngle;
+  drawWheel();
+  spinAngle *= 0.97;
+  if (spinAngle > 0.01) {
+    requestAnimationFrame(rotateWheel);
+  } else {
+    finishSpin();
+  }
+}
+
+function startSpin() {
+  if (spinning) return;
+  const category = document.getElementById('category').value;
+  movies = allMovies[category] || [];
+  if (!movies.length) return;
+
+  drawWheel(); // vẽ mới trước khi quay
+  resultDiv.classList.remove('show');
+  spinAngle = Math.random() * 0.3 + 0.3;
+  spinning = true;
+  rotateWheel();
+}
+
+function finishSpin() {
+  const arc = 2 * Math.PI / movies.length;
+  const angle = startAngle % (2 * Math.PI);
+  const index = Math.floor((2 * Math.PI - angle) / arc) % movies.length;
+  const chosen = movies[index];
+
+  setTimeout(() => {
+    resultDiv.innerText = `🎉 Hôm nay xem: ${chosen} 🎬`;
+    resultDiv.classList.add('show');
+    spinning = false;
+  }, 500);
+}
+
+// Khởi tạo ban đầu
+movies = allMovies["romantic"];
+drawWheel();
+</script>
+</body>
+</html>
