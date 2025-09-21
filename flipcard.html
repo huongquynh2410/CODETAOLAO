@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Game Lật Hình</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: linear-gradient(135deg, #74ebd5, #9face6);
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: #fff;
+      text-shadow: 2px 2px 4px #333;
+    }
+    .game-board {
+      display: grid;
+      grid-template-columns: repeat(4, 100px);
+      grid-gap: 15px;
+      justify-content: center;
+      margin: 30px auto;
+    }
+    .card {
+      width: 100px;
+      height: 100px;
+      perspective: 1000px;
+      cursor: pointer;
+    }
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 0.5s;
+    }
+    .card.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+    }
+    .card-front {
+      background: #ffffff;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      transform: rotateY(180deg);
+    }
+    .card-back {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+    /* Hiệu ứng biến mất */
+    .matched {
+      animation: vanish 0.6s forwards;
+    }
+    @keyframes vanish {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.7; }
+      100% { transform: scale(0); opacity: 0; }
+    }
+    /* Nút chơi lại */
+    .restart-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      background: #ff7eb3;
+      color: #fff;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    .restart-btn:hover {
+      background: #ff4f91;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <h1>🎮 Game Lật Hình 🎴</h1>
+  <div class="game-board" id="gameBoard"></div>
+  <button class="restart-btn" onclick="initGame()">🔄 Chơi lại</button>
+
+  <script>
+    const emojis = ["🍎","🍎","🍌","🍌","🍇","🍇","🍉","🍉"];
+    const board = document.getElementById("gameBoard");
+    let flippedCards = [];
+
+    function initGame() {
+      board.innerHTML = ""; // reset bàn chơi
+      flippedCards = [];
+      let shuffled = [...emojis].sort(() => 0.5 - Math.random());
+
+      shuffled.forEach(emoji => {
+        const card = document.createElement("div");
+        card.classList.add("card");
+        card.innerHTML = `
+          <div class="card-inner">
+            <div class="card-front">${emoji}</div>
+            <div class="card-back">❓</div>
+          </div>`;
+        board.appendChild(card);
+        card.addEventListener("click", () => flipCard(card));
+      });
+    }
+
+    function flipCard(card) {
+      if (flippedCards.length < 2 && !card.classList.contains("flipped")) {
+        card.classList.add("flipped");
+        flippedCards.push(card);
+
+        if (flippedCards.length === 2) {
+          setTimeout(checkMatch, 800);
+        }
+      }
+    }
+
+    function checkMatch() {
+      const [card1, card2] = flippedCards;
+      const emoji1 = card1.querySelector(".card-front").textContent;
+      const emoji2 = card2.querySelector(".card-front").textContent;
+
+      if (emoji1 === emoji2) {
+        card1.classList.add("matched");
+        card2.classList.add("matched");
+        setTimeout(() => {
+          card1.style.visibility = "hidden";
+          card2.style.visibility = "hidden";
+        }, 600);
+      } else {
+        card1.classList.remove("flipped");
+        card2.classList.remove("flipped");
+      }
+      flippedCards = [];
+    }
+
+    // Khởi tạo game ngay từ đầu
+    initGame();
+  </script>
+</body>
+</html>
