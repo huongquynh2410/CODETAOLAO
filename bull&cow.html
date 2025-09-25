@@ -65,7 +65,6 @@
       <aside class="glass p-4 rounded-2xl shadow-lg">
         <h2 class="font-semibold mb-2">Trạng thái</h2>
         <div id="status" class="text-slate-400 text-sm mb-4">Sẵn sàng chơi — nhấn "Game mới" để bắt đầu.</div>
-        <button id="copyHistory" class="w-full py-2 rounded-xl bg-slate-700 hover:bg-slate-600">Sao chép lịch sử</button>
       </aside>
     </section>
 
@@ -95,12 +94,22 @@
     </div>
   </div>
 
+  <!-- Modal kết quả -->
+  <div id="resultModal" class="fixed inset-0 hidden bg-black/60 flex items-center justify-center z-50">
+    <div class="bg-slate-900 p-6 rounded-2xl max-w-md w-full shadow-2xl border border-slate-700 text-center">
+      <h2 id="resultTitle" class="text-2xl font-bold mb-4"></h2>
+      <p id="resultMessage" class="text-slate-300 mb-6"></p>
+      <button id="closeResult" class="px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white">OK</button>
+    </div>
+  </div>
+
   <script>
     const DEFAULT_LEN = 4;
     let secret = '';
     let len = DEFAULT_LEN;
     let attempts = 0;
     let history = [];
+    let gameOver = false;
 
     const statusEl = document.getElementById('status');
     const newGameBtn = document.getElementById('newGameBtn');
@@ -112,10 +121,14 @@
     const historyEl = document.getElementById('history');
     const digitPad = document.getElementById('digitPad');
     const currentGuessEl = document.getElementById('currentGuess');
-    const copyHistoryBtn = document.getElementById('copyHistory');
     const guideBtn = document.getElementById('guideBtn');
     const guideModal = document.getElementById('guideModal');
     const closeGuide = document.getElementById('closeGuide');
+
+    const resultModal = document.getElementById('resultModal');
+    const resultTitle = document.getElementById('resultTitle');
+    const resultMessage = document.getElementById('resultMessage');
+    const closeResult = document.getElementById('closeResult');
 
     function genSecret(n){
       const digits = '0123456789'.split('');
@@ -150,6 +163,7 @@
     }
 
     function inputDigit(d){
+      if(gameOver) return;
       let cur = getCurrentGuess();
       if(cur.length >= len) return;
       if(cur.includes(d)) return;
@@ -171,6 +185,7 @@
     function getCurrentGuess(){ return typedInput.value.trim(); }
 
     function submitGuess(){
+      if(gameOver) return;
       const guess = getCurrentGuess();
       if(guess.length !== len) return;
       if(new Set(guess).size !== guess.length) return;
@@ -187,6 +202,8 @@
       if(res.bulls === len){
         statusEl.textContent = `Bạn đã thắng sau ${attempts} lượt!`;
         statusEl.classList.add('text-green-300');
+        showResult("🎉 Chúc mừng!", `Bạn đã đoán đúng số bí mật sau ${attempts} lượt.`);
+        gameOver = true;
       }
     }
 
@@ -211,23 +228,26 @@
       secret = genSecret(len);
       attemptsEl.textContent = attempts;
       statusEl.textContent = `Game mới: ${len} chữ số.`;
-      statusEl.classList.remove('text-green-300');
+      statusEl.classList.remove('text-green-300','text-red-400');
       renderHistory();
       setCurrentGuess('');
       typedInput.maxLength = len;
       typedInput.focus();
+      gameOver = false;
     }
 
     function surrender(){
+      if(gameOver) return;
       statusEl.textContent = 'Bạn đã đầu hàng! Số bí mật là: ' + secret;
       statusEl.classList.add('text-red-400');
+      showResult("😢 Bạn đã đầu hàng!", "Số bí mật là: " + secret);
+      gameOver = true;
     }
 
-    function copyHistory(){
-      if(history.length===0) return;
-      let txt = `Bulls & Cows — Lịch sử (dãy ${len} chữ số)\n`;
-      history.slice().reverse().forEach((h,i)=>{ txt += `${history.length-i}. ${h.guess} → ${h.res.bulls}B ${h.res.cows}C\n`; });
-      navigator.clipboard.writeText(txt);
+    function showResult(title, message){
+      resultTitle.textContent = title;
+      resultMessage.textContent = message;
+      resultModal.classList.remove('hidden');
     }
 
     // modal hướng dẫn
@@ -235,9 +255,13 @@
     closeGuide.addEventListener('click', ()=>{ guideModal.classList.add('hidden'); });
     guideModal.addEventListener('click', (e)=>{ if(e.target===guideModal) guideModal.classList.add('hidden'); });
 
+    // modal kết quả
+    closeResult.addEventListener('click', ()=>{ resultModal.classList.add('hidden'); });
+
     submitBtn.addEventListener('click', submitGuess);
-    backBtn.addEventListener('click', ()=>{ let s = getCurrentGuess(); s = s.slice(0,-1); setCurrentGuess(s); });
+    backBtn.addEventListener('click', ()=>{ if(gameOver) return; let s = getCurrentGuess(); s = s.slice(0,-1); setCurrentGuess(s); });
     typedInput.addEventListener('input', (e)=>{
+      if(gameOver){ e.target.value=''; return; }
       let v = e.target.value.replace(/\D/g,'').slice(0,len);
       let seen = new Set(); let out='';
       for(const ch of v){ if(!seen.has(ch)){ out+=ch; seen.add(ch); } }
@@ -247,9 +271,9 @@
 
     newGameBtn.addEventListener('click', newGame);
     surrenderBtn.addEventListener('click', surrender);
-    copyHistoryBtn.addEventListener('click', copyHistory);
 
     window.addEventListener('keydown', (e)=>{
+      if(gameOver) return;
       if(e.key >= '0' && e.key <= '9'){ inputDigit(e.key); }
       if(e.key === 'Enter') submitGuess();
       if(e.key === 'Escape') setCurrentGuess('');
