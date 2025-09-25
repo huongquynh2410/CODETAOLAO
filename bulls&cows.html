@@ -24,7 +24,7 @@
       <div class="flex gap-2">
         <button id="guideBtn" class="px-3 py-1 rounded-md bg-slate-700 text-white hover:bg-slate-600">Hướng dẫn</button>
         <button id="newGameBtn" class="px-3 py-1 rounded-md bg-gradient-to-r from-violet-600 to-cyan-500 text-white shadow-lg hover:scale-105 transition-transform">Game mới</button>
-        <button id="revealBtn" class="px-3 py-1 rounded-md glass border border-slate-700 text-slate-200 hover:bg-slate-800">Hiện/Ẩn</button>
+        <button id="surrenderBtn" class="px-3 py-1 rounded-md bg-red-600 hover:bg-red-500 text-white shadow-lg">Đầu hàng</button>
       </div>
     </header>
 
@@ -101,32 +101,21 @@
     let len = DEFAULT_LEN;
     let attempts = 0;
     let history = [];
-    let revealed = false;
 
-    const confettiCanvas = document.getElementById('confettiCanvas');
-    const ctx = confettiCanvas.getContext('2d');
-    function resizeCanvas(){confettiCanvas.width = window.innerWidth; confettiCanvas.height = window.innerHeight}
-    window.addEventListener('resize', resizeCanvas); resizeCanvas();
-
-    function fireConfetti(){
-      const pieces = [];
-      const colors = ['#ef4444','#f97316','#f59e0b','#84cc16','#06b6d4','#7c3aed','#ec4899'];
-      for(let i=0;i<120;i++){
-        pieces.push({x:Math.random()*innerWidth,y:Math.random()*-innerHeight/2+50, vx:(Math.random()-0.5)*6, vy:Math.random()*6+2, r:Math.random()*6+3, color:colors[Math.floor(Math.random()*colors.length)], rot:Math.random()*360, vr:(Math.random()-0.5)*10});
-      }
-      let t=0;
-      const anim = setInterval(()=>{
-        ctx.clearRect(0,0,innerWidth,innerHeight);
-        t+=1;
-        for(const p of pieces){
-          p.x+=p.vx; p.y+=p.vy; p.vy+=0.15; p.rot+=p.vr*0.03;
-          ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
-          ctx.fillStyle=p.color; ctx.fillRect(-p.r/2,-p.r/2,p.r,p.r*0.6);
-          ctx.restore();
-        }
-        if(t>140){ clearInterval(anim); ctx.clearRect(0,0,innerWidth,innerHeight); }
-      },16);
-    }
+    const statusEl = document.getElementById('status');
+    const newGameBtn = document.getElementById('newGameBtn');
+    const surrenderBtn = document.getElementById('surrenderBtn');
+    const submitBtn = document.getElementById('submitGuess');
+    const backBtn = document.getElementById('backBtn');
+    const typedInput = document.getElementById('typedInput');
+    const attemptsEl = document.getElementById('attempts');
+    const historyEl = document.getElementById('history');
+    const digitPad = document.getElementById('digitPad');
+    const currentGuessEl = document.getElementById('currentGuess');
+    const copyHistoryBtn = document.getElementById('copyHistory');
+    const guideBtn = document.getElementById('guideBtn');
+    const guideModal = document.getElementById('guideModal');
+    const closeGuide = document.getElementById('closeGuide');
 
     function genSecret(n){
       const digits = '0123456789'.split('');
@@ -148,21 +137,6 @@
       cows -= bulls;
       return {bulls,cows};
     }
-
-    const digitPad = document.getElementById('digitPad');
-    const currentGuessEl = document.getElementById('currentGuess');
-    const submitBtn = document.getElementById('submitGuess');
-    const backBtn = document.getElementById('backBtn');
-    const typedInput = document.getElementById('typedInput');
-    const historyEl = document.getElementById('history');
-    const attemptsEl = document.getElementById('attempts');
-    const statusEl = document.getElementById('status');
-    const newGameBtn = document.getElementById('newGameBtn');
-    const revealBtn = document.getElementById('revealBtn');
-    const copyHistoryBtn = document.getElementById('copyHistory');
-    const guideBtn = document.getElementById('guideBtn');
-    const guideModal = document.getElementById('guideModal');
-    const closeGuide = document.getElementById('closeGuide');
 
     function buildDigitPad(){
       digitPad.innerHTML = '';
@@ -194,9 +168,7 @@
       typedInput.value = s;
     }
 
-    function getCurrentGuess(){
-      return typedInput.value.trim();
-    }
+    function getCurrentGuess(){ return typedInput.value.trim(); }
 
     function submitGuess(){
       const guess = getCurrentGuess();
@@ -215,8 +187,6 @@
       if(res.bulls === len){
         statusEl.textContent = `Bạn đã thắng sau ${attempts} lượt!`;
         statusEl.classList.add('text-green-300');
-        revealBtn.textContent = 'Tiết lộ';
-        fireConfetti();
       }
     }
 
@@ -237,7 +207,7 @@
     function newGame(){
       const chosen = document.querySelector('input[name=len]:checked').value;
       len = parseInt(chosen,10);
-      attempts = 0; history = []; revealed=false;
+      attempts = 0; history = [];
       secret = genSecret(len);
       attemptsEl.textContent = attempts;
       statusEl.textContent = `Game mới: ${len} chữ số.`;
@@ -248,12 +218,9 @@
       typedInput.focus();
     }
 
-    function toggleReveal(){
-      revealed = !revealed;
-      if(revealed){
-        revealBtn.textContent = 'Ẩn';
-        statusEl.textContent = 'Số bí mật: ' + secret;
-      } else { revealBtn.textContent = 'Hiện/Ẩn'; }
+    function surrender(){
+      statusEl.textContent = 'Bạn đã đầu hàng! Số bí mật là: ' + secret;
+      statusEl.classList.add('text-red-400');
     }
 
     function copyHistory(){
@@ -263,7 +230,7 @@
       navigator.clipboard.writeText(txt);
     }
 
-    // Thêm sự kiện cho modal hướng dẫn
+    // modal hướng dẫn
     guideBtn.addEventListener('click', ()=>{ guideModal.classList.remove('hidden'); });
     closeGuide.addEventListener('click', ()=>{ guideModal.classList.add('hidden'); });
     guideModal.addEventListener('click', (e)=>{ if(e.target===guideModal) guideModal.classList.add('hidden'); });
@@ -279,7 +246,7 @@
     typedInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') { e.preventDefault(); submitGuess(); } });
 
     newGameBtn.addEventListener('click', newGame);
-    revealBtn.addEventListener('click', toggleReveal);
+    surrenderBtn.addEventListener('click', surrender);
     copyHistoryBtn.addEventListener('click', copyHistory);
 
     window.addEventListener('keydown', (e)=>{
